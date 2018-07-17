@@ -26,6 +26,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(nextTick), userInfo: nil, repeats: true);
         RunLoop.current.add(timer!, forMode: RunLoopMode.commonModes)
         
+        let getWeekOfDayForQ = {(date: Date, q: Int, start: Bool) -> DateComponents in
+            var dc = self.calendar.dateComponents([.year, .month, .day], from: date)
+            
+            dc.month = q * 3 + (start ? -2 : 1);
+            dc.day = start ? 1 : -1;
+            
+            let nd = self.calendar.date(from: dc)!;
+            var res = self.calendar.dateComponents([.weekOfYear, .weekday, .year, .month, .day], from: nd)
+            let wd = res.weekday!
+            
+            res.weekOfYear = res.weekOfYear! + (start
+                ? (wd != 2 ? 1 : 0)
+                : (wd == 2 && wd == 3 ? -1 : 0)
+            );
+            
+            return res;
+        };
+        
         getters = [
             {(date: Date) -> String in
                 let n = self.calendar.component(.weekOfYear, from: date)
@@ -33,6 +51,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 let q = Int(ceil(Float(m) / 3.0));
                 return String(n) + " (Q" + String(q) + ")"
             },
+            
+            {(date: Date) -> String in
+                let c = self.calendar.dateComponents([.weekOfYear, .month], from: date)
+                let q = Int(ceil(Float(c.month!) / 3.0));
+                
+                let start = getWeekOfDayForQ(date, q, true);
+                let startDate = self.calendar.date(from: start)!;
+                
+                let end = getWeekOfDayForQ(date, q, false);
+                let endDate = self.calendar.date(from: end)!;
+                
+                let allDays = self.calendar.dateComponents([.day], from: startDate, to: endDate)
+                let endDiff = self.calendar.dateComponents([.day], from: date, to: endDate)
+                let used = Float(allDays.day! - endDiff.day!)/Float(allDays.day!)
+
+                return "Days left: " + String(endDiff.day!) + " (" + String(end.weekOfYear! - c.weekOfYear!) + " weeks, ~" + String(round(used * 100)) + "%)";
+            },
+            
             {(_: Date) -> String in
                 return "-";
             },
