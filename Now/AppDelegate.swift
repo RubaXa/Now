@@ -66,7 +66,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 let endDiff = self.calendar.dateComponents([.day], from: date, to: endDate)
                 let used = Float(allDays.day! - endDiff.day!)/Float(allDays.day!)
 
-                return "Days left: " + String(endDiff.day!) + " (" + String(end.weekOfYear! - c.weekOfYear!) + " weeks, ~" + String(round(used * 100)) + "%)";
+                return "Days left: " + String(endDiff.day!) + " (" + String(end.weekOfYear! - c.weekOfYear!) + " weeks, ~" + String(Int(round(used * 100))) + "%)";
             },
             
             {(_: Date) -> String in
@@ -93,12 +93,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             },
             
             {(date: Date) -> String in
-                self.formatter.dateFormat = "EEEE (dd)"
+                self.formatter.dateFormat = "dd EEEE"
                 return self.formatter.string(from: date);
             },
 
             {(date: Date) -> String in
-                self.formatter.dateFormat = "LLLL (MM)"
+                self.formatter.dateFormat = "MM LLLL"
                 return self.formatter.string(from: date);
             },
 
