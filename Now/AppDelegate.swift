@@ -8,6 +8,23 @@
 
 import Cocoa
 
+extension Calendar {
+    static let gregorian = Calendar(identifier: .gregorian)
+}
+
+extension Date {
+    var startOfWeek: Date? {
+        let start = Calendar.gregorian.date(from: Calendar.gregorian.dateComponents([.yearForWeekOfYear, .weekOfYear], from: self))
+        return Calendar.gregorian.date(byAdding: .day, value: 1, to: start!)
+    }
+    
+    var endOfWeek: Date? {
+        let gregorian = Calendar.gregorian;
+        let end = gregorian.date(from: gregorian.dateComponents([.yearForWeekOfYear, .weekOfYear], from: self))
+        return gregorian.date(byAdding: .day, value: 7, to: end!)
+    }
+}
+
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
 
@@ -52,6 +69,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 return String(n) + " (Q" + String(q) + ")"
             },
             
+            {(date: Date) -> String in
+                self.formatter.dateFormat = "dd.MM.yyyy"
+                
+                return (
+                    self.formatter.string(from: date.startOfWeek!)
+                    + " - "
+                    + self.formatter.string(from: date.endOfWeek!)
+                );
+            },
+
             {(date: Date) -> String in
                 let c = self.calendar.dateComponents([.weekOfYear, .month], from: date)
                 let q = Int(ceil(Float(c.month!) / 3.0));
